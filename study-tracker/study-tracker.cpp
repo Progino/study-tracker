@@ -79,10 +79,10 @@ int main() {
 
 		switch (choice) {
 		case 1:
-			//position = add(subjects,position);vdjsanfvjinaesojfvnaknnjnvfjinjwenf
+			//position = add(subjects,position);
 			break;
 		case 2:
-			//start(subjects); bvrytdfg
+			//start(subjects); 
 			break;
 		case 3:
 			//view(subjects);
@@ -92,5 +92,5 @@ int main() {
 		default:
 			cout << "Invalid choice. Please try again." << endl;
 		}
-}
+}//works?
 
