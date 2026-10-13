@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="study-tracker/study-tracker.vcxproj" />
+  <Project Path="study-tracker/study-tracker.vcxproj" Id="576a02bf-d810-4b2c-a74c-c80e153462ca" />
 </Solution>
