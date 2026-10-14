@@ -19,4 +19,7 @@
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="todolist.txt" />
+  </ItemGroup>
 </Project>

@@ -3,14 +3,26 @@
 #include <ctime>
 #include <chrono>
 #include <fstream>
+#include <iomanip>
 #define MAX 10
 using namespace std;
 using namespace std::chrono;
 
 struct SUBJECTS {
 	string name;
-	double hour = 0;
+	double time = 0;
 };
+
+void displayTime(int totalSeconds) {
+
+	int hours = totalSeconds / 3600;
+	int minutes = (totalSeconds % 3600) / 60;
+	int seconds = totalSeconds % 60;
+
+	cout << setfill('0') << setw(2) << hours << ":"
+		<< setfill('0') << setw(2) << minutes << ":"
+		<< setfill('0') << setw(2) << seconds << endl<< endl;
+}
 
 int menu() {
 	int response;
@@ -20,6 +32,10 @@ int menu() {
 	cout << "4. Exit" << endl;
 	cout << "Enter your choice: ";
 	cin >> response;
+	if (cin.fail()) {
+		cin.clear();
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	}
 	return response;
 }
 
@@ -30,11 +46,16 @@ int add(SUBJECTS s[], int p) {
 	}
 	string name;
 	bool alreadyExists;
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
 	while (true) {
 		cout << "Enter the subject name: ";
-		cin >> name;
+		getline(cin, name);
 		alreadyExists = false;
+
+		if (name.empty()) {
+			continue;
+		}
 
 		for (int i = 0; i < p; i++) {
 			if (name == s[i].name) {
@@ -59,9 +80,10 @@ void view(SUBJECTS s[]){
 	string name;
 	bool found = false;
 	int i;
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	while(true) {
 		cout << "Enter the subject you want to see: ";
-		cin >>name;
+		getline(cin, name);
 		for (i = 0;i < MAX;i++) {
 			if (name == s[i].name) {
 				found = true;
@@ -73,20 +95,21 @@ void view(SUBJECTS s[]){
 		}
 		else {
 			cout << endl <<"Subject: " << s[i].name << endl;
-			cout << "Hours studied: " << s[i].hour << endl<<endl;
+			cout << "Time: ";
+			displayTime(s[i].time);
 			break;
 		}
 	}
 }
-
 			
 void start(SUBJECTS s[]) {
 	string name;
 	int i;
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	while (true) {
 		bool found = false;
 		cout << "Enter the subject you want to start tracking: ";
-		cin >> name;
+		getline(cin, name);
 		for (i = 0;i < MAX;i++) {
 			if (name == s[i].name) {
 				found = true;
@@ -97,6 +120,7 @@ void start(SUBJECTS s[]) {
 			cout << "Subject not found. Please try again." << endl;
 		}
 		else {
+			cout << "press Enter to start the timer" << endl;
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			auto start_time = steady_clock::now();
 
@@ -107,20 +131,9 @@ void start(SUBJECTS s[]) {
 			duration<double> elapsed = end_time - start_time;
 			double seconds_elapsed = elapsed.count();
 
-			s[i].hour += seconds_elapsed;
-
-			cout << "Time for this session: " << seconds_elapsed << " seconds." << endl;
-			cout << "Total time accumulated: " << s[i].hour << " seconds." << endl;
-
-			ofstream outfile("timer_log.txt");
-			if (outfile.is_open()) {
-				outfile << "Total time accumulated: " << s[i].hour << " seconds." << endl;
-				outfile.close();
-				cout << "Updated value saved in 'timer_log.txt'." << endl;
-			}
-			else {
-				cerr << "Error opening the file!" << endl;
-			}
+			cout << "Session time: ";
+			displayTime(seconds_elapsed);
+			s[i].time += seconds_elapsed;
 			break;
 		}
 	}

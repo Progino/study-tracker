@@ -1,0 +1,21 @@
+save the subjects,
+delete subjects,
+calendar,
+putting event in the calendar,
+planner of studying based on the calendar,(days off)
+statistics{
+	total study time,
+	average study time,
+	most studied subject,
+	least studied subject,
+	study time per day,
+	study time per week,
+	study time per month
+}
+goals,
+break time,(what tipe of break,
+notes,
+creating interface?(if I can),
+adding level system with points for studying,consistency, and completing goals,
+
+
