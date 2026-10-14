@@ -4,6 +4,7 @@
 #include <chrono>
 #include <fstream>
 #include <iomanip>
+#include <limits>
 #define MAX 10
 using namespace std;
 using namespace std::chrono;
@@ -46,7 +47,6 @@ int add(SUBJECTS s[], int p) {
 	}
 	string name;
 	bool alreadyExists;
-	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
 	while (true) {
 		cout << "Enter the subject name: ";
@@ -76,14 +76,17 @@ int add(SUBJECTS s[], int p) {
 	}
 }
 
-void view(SUBJECTS s[]){
+void view(SUBJECTS s[],int p){
 	string name;
-	bool found = false;
 	int i;
-	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	while(true) {
+		bool found = false;
 		cout << "Enter the subject you want to see: ";
 		getline(cin, name);
+		if (p == 0) {
+			cout << "Add a subject first." << endl << endl;
+			break;
+		}
 		for (i = 0;i < MAX;i++) {
 			if (name == s[i].name) {
 				found = true;
@@ -102,14 +105,17 @@ void view(SUBJECTS s[]){
 	}
 }
 			
-void start(SUBJECTS s[]) {
+void start(SUBJECTS s[],int p) {
 	string name;
 	int i;
-	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	while (true) {
 		bool found = false;
 		cout << "Enter the subject you want to start tracking: ";
 		getline(cin, name);
+		if (p == 0) {
+			cout << "Add a subject first." << endl<<endl;
+			break;
+		}
 		for (i = 0;i < MAX;i++) {
 			if (name == s[i].name) {
 				found = true;
@@ -121,7 +127,7 @@ void start(SUBJECTS s[]) {
 		}
 		else {
 			cout << "press Enter to start the timer" << endl;
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			cin.get();
 			auto start_time = steady_clock::now();
 
 			cout << "Timer started! Press Enter to stop it..." << endl<<endl;
@@ -148,15 +154,17 @@ int main() {
 
 		choice = menu();
 
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
 		switch (choice) {
 		case 1:
 			position = add(subjects, position);
 			break;
 		case 2:
-			start(subjects); 
+			start(subjects, position); 
 			break;
 		case 3:
-			view(subjects);
+			view(subjects, position);
 			break;
 		case 4:
 			return 0;
