@@ -1,6 +1,7 @@
-save the subjects,
-delete subjects,
+save the subjects,    x
+delete subjects,      x
 calendar,
+cleaning the code,
 putting event in the calendar,
 planner of studying based on the calendar,(days off)
 statistics{
@@ -13,7 +14,7 @@ statistics{
 	study time per month
 }
 goals,
-break time,(what tipe of break,
+break time,(what tipe of break(lunch,hobby,...)),
 notes,
 creating interface?(if I can),
 adding level system with points for studying,consistency, and completing goals,

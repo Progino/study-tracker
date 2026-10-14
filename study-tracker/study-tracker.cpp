@@ -1,11 +1,11 @@
 #include <iostream>
-#include <cstdio>
 #include <ctime>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <limits>
-#define MAX 10
+#include <algorithm>
+#define MAX 20
 using namespace std;
 using namespace std::chrono;
 
@@ -13,6 +13,15 @@ struct SUBJECTS {
 	string name;
 	double time = 0;
 };
+
+const string FILENAME = "Time.txt";
+
+string toLowerString(string str){
+	transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
+		return tolower(c);
+	});
+	return str;
+}
 
 void displayTime(int totalSeconds) {
 
@@ -25,13 +34,49 @@ void displayTime(int totalSeconds) {
 		<< setfill('0') << setw(2) << seconds << endl<< endl;
 }
 
+void saveToFile(SUBJECTS s[], int p) {
+	ofstream file(FILENAME);
+	if (!file.is_open()) {
+		cout << "Error Could not save data to file!" << endl;
+		return;
+	}
+	for (int i = 0; i < p; i++) {
+		file << s[i].name << "," << s[i].time << endl;
+	}
+	file.close();
+}
+
+int loadFromFile(SUBJECTS s[]) {
+	ifstream file(FILENAME);
+	int p = 0;
+
+	if (!file.is_open()) {
+		return 0;
+	}
+
+	string name;
+	double time;
+
+	while (p < MAX && getline(file, name, ',')) {
+		if (file >> time) {
+			s[p].name = name;
+			s[p].time = time;
+			p++;
+		}
+		file >> ws;
+	}
+
+	file.close();
+	return p;
+}
+
 int menu() {
 	int response;
 	cout << "1. Add subject" << endl;
-	cout << "2. Start timer" << endl;
-	cout << "3. View your time" << endl;
-	cout << "4. Exit" << endl;
-	cout << "Enter your choice: ";
+	cout << "2. Remove subject" << endl;
+	cout << "3. Start timer" << endl;
+	cout << "4. View your time" << endl;
+	cout << "5. Exit" << endl;
 	cin >> response;
 	if (cin.fail()) {
 		cin.clear();
@@ -58,10 +103,10 @@ int add(SUBJECTS s[], int p) {
 		}
 
 		for (int i = 0; i < p; i++) {
-			if (name == s[i].name) {
-				alreadyExists = true;
-				break;
-			}
+				if (toLowerString(name) == toLowerString(s[i].name)) {
+					alreadyExists = true;
+					break;
+				}
 		}
 
 		if (alreadyExists) {
@@ -71,8 +116,46 @@ int add(SUBJECTS s[], int p) {
 			s[p].name = name;
 			cout << "Subject added successfully." << endl<<endl;
 			p++;
+			saveToFile(s, p);
 			return p;
 		}
+	}
+}
+
+int remove(SUBJECTS s[], int p) {
+
+	string name;
+
+	while (true) {
+		cout << "Enter the subject to delete: ";
+		getline(cin, name);
+
+		if (name == "0") return p;
+		if (name.empty()) continue;
+
+		int foundIndex = -1;
+
+		for (int i = 0;i < p;i++) {
+
+			if (toLowerString(name) == toLowerString(s[i].name)) {
+				foundIndex = i;
+				break;
+			}
+		}
+		if (foundIndex == -1) {
+			cout << "Subject not found. Please try again." << endl;
+		}
+		else {
+			for (int j = foundIndex; j < p - 1; j++) {
+				s[j] = s[j + 1];
+			}
+			p--;
+			cout << "Subject deleted successfully." << endl << endl;
+			saveToFile(s, p);
+			return p;
+		}
+
+		
 	}
 }
 
@@ -87,8 +170,8 @@ void view(SUBJECTS s[],int p){
 			cout << "Add a subject first." << endl << endl;
 			break;
 		}
-		for (i = 0;i < MAX;i++) {
-			if (name == s[i].name) {
+		for (i = 0;i < p;i++) {
+			if (toLowerString(name) == toLowerString(s[i].name)) {
 				found = true;
 				break;
 			}
@@ -116,8 +199,8 @@ void start(SUBJECTS s[],int p) {
 			cout << "Add a subject first." << endl<<endl;
 			break;
 		}
-		for (i = 0;i < MAX;i++) {
-			if (name == s[i].name) {
+		for (i = 0;i < p;i++) {
+			if (toLowerString(name) == toLowerString(s[i].name)) {
 				found = true;
 				break;
 			}
@@ -140,6 +223,7 @@ void start(SUBJECTS s[],int p) {
 			cout << "Session time: ";
 			displayTime(seconds_elapsed);
 			s[i].time += seconds_elapsed;
+			saveToFile(s, p);
 			break;
 		}
 	}
@@ -149,6 +233,8 @@ int main() {
 	SUBJECTS subjects[MAX];
 	int choice;
 	int position = 0;
+
+	position = loadFromFile(subjects);
 
 	while (true) {
 
@@ -161,16 +247,18 @@ int main() {
 			position = add(subjects, position);
 			break;
 		case 2:
-			start(subjects, position); 
+			position = remove(subjects, position);
 			break;
 		case 3:
-			view(subjects, position);
+			start(subjects, position); 
 			break;
 		case 4:
+			view(subjects, position);
+			break;
+		case 5:
 			return 0;
 		default:
 			cout << "Invalid choice. Please try again." << endl;
 		}
 	}
 }
-
