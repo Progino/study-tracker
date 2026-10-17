@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <limits>
 #include <algorithm>
+#include <thread>
+#include <conio.h>
 #define MAX 20
 using namespace std;
 using namespace std::chrono;
@@ -203,8 +205,7 @@ void view(SUBJECTS s[],int p){
 			cout << "Subject not found. Please try again." << endl;
 		}
 		else {
-			cout << endl << "----------------------" << endl;
-			cout <<"Subject: " << s[i].name << endl;
+			cout <<endl <<"Subject: " << s[i].name << endl;
 			cout << "Time: ";
 			displayTime(s[i].time);
 			break;
@@ -238,23 +239,109 @@ void start(SUBJECTS s[],int p) {
 			cout << "Subject not found. Please try again." << endl;
 		}
 		else {
-			cout << "press Enter to start the timer" << endl;
-			cin.get();
-			auto start_time = steady_clock::now();
+			while (true) {
+				int mode;
+				cout << "  CHOOSE TRACKING MODE " << endl;
+				cout << "1. Standard Stopwatch Timer" << endl;
+				cout << "2. Pomodoro Timer" << endl;
+				cin >> mode;
+				if (mode == 1) {
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					cout << "press Enter to start the timer" << endl;
+					cin.get();
+					auto start_time = steady_clock::now();
 
-			cout << "Timer started! Press Enter to stop it..." << endl<<endl;
-			cin.get();
+					cout << "Timer started! Press Enter to stop it..." << endl << endl;
+					cin.get();
 
-			auto end_time = steady_clock::now();
-			duration<double> elapsed = end_time - start_time;
-			double seconds_elapsed = elapsed.count();
+					auto end_time = steady_clock::now();
+					duration<double> elapsed = end_time - start_time;
+					double seconds_elapsed = elapsed.count();
 
-			cout << "Session time: ";
-			displayTime(seconds_elapsed);
+					cout << "Session time: ";
+					displayTime(seconds_elapsed);
 
-			s[i].time += seconds_elapsed;
-			saveToFile(s, p);
-			break;
+					s[i].time += seconds_elapsed;
+					saveToFile(s, p);
+					return;
+				}
+				else if (mode == 2) {
+					int activeTime;
+					int pauseTime;
+					int rounds;
+					cout << "Enter study duration in minutes (e.g., 25): ";
+					cin >> activeTime;
+					cout << "Enter break duration in minutes (e.g., 5): ";
+					cin >> pauseTime;
+					cout << "Enter the number of rounds to complete (e.g., 4): ";
+					cin >> rounds;
+
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+					cout << "press Enter to start the timer" << endl;
+					cin.get();
+					int activeTimeSeconds = activeTime * 60;
+					int pauseTimeSeconds = pauseTime * 60;
+
+					bool stopEarly = false;
+					cout << "[Press 'Q' to Quit early]"<<endl;
+					for (int r = 1;r <= rounds;r++) {
+						int currentSeconds = 0;
+						while (currentSeconds <= activeTimeSeconds && !stopEarly) {
+							cout << "\rstudying time: " << formatTimeStr(currentSeconds) << "/" << formatTimeStr(activeTimeSeconds) << flush;
+
+							this_thread::sleep_for(seconds(1));
+
+							if (_kbhit()) {
+								char ch = _getch();
+								if (ch == 'q' || ch == 'Q') {
+									stopEarly = true;
+								}
+							}
+							if(!stopEarly) currentSeconds++;
+						}
+
+						if (stopEarly) {
+							s[i].time += currentSeconds;
+							saveToFile(s, p);
+							cout << endl << "Session stopped early! Accrued " << formatTimeStr(currentSeconds) << endl;
+							return;
+						}
+						cout <<endl << "Studying time ended"<<endl;
+
+						s[i].time += activeTimeSeconds;
+						saveToFile(s, p);
+
+						if (r == rounds)break;
+
+						currentSeconds = 0;
+						while (currentSeconds <= pauseTimeSeconds) {
+							cout << "\rbreak time: " << formatTimeStr(currentSeconds) << "/" << formatTimeStr(pauseTimeSeconds) << "   " << flush;
+							
+							this_thread::sleep_for(seconds(1));
+							if (_kbhit()) {
+								char ch = _getch();
+								if (ch == 'q' || ch == 'Q') {
+									stopEarly = true;
+								}
+							}
+
+							if (!stopEarly) currentSeconds++;
+						}
+
+						if (stopEarly) {
+							cout << endl << "Session stopped early!" << endl;
+							return;
+						}
+						cout <<endl<< "Break time ended" << endl;
+					}
+					cout << "Pomodoro timer ended"<<endl;
+					return;
+				}
+				else {
+					cout << "Invalid choice.Please try again." << endl << endl;
+				}
+			}
 		}
 	}
 }
@@ -289,6 +376,9 @@ int main() {
 	int position = 0;
 
 	position = loadFromFile(subjects);
+
+	cout << "=======================" << endl;
+	cout << "     STUDY TRACKER     " << endl;
 
 	while (true) {
 

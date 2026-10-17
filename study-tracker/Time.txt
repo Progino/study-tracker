@@ -1,3 +1,4 @@
-science,122.576
-math,5.46364
+science,242.576
+math,487.464
 english,12.2345
+History,120
