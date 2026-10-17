@@ -23,21 +23,27 @@ string toLowerString(string str){
 	return str;
 }
 
-void displayTime(int totalSeconds) {
-
+string formatTimeStr(int totalSeconds) {
 	int hours = totalSeconds / 3600;
 	int minutes = (totalSeconds % 3600) / 60;
 	int seconds = totalSeconds % 60;
 
-	cout << setfill('0') << setw(2) << hours << ":"
-		<< setfill('0') << setw(2) << minutes << ":"
-		<< setfill('0') << setw(2) << seconds << endl<< endl;
+	string hh = (hours < 10 ? "0" : "") + to_string(hours);
+	string mm = (minutes < 10 ? "0" : "") + to_string(minutes);
+	string ss = (seconds < 10 ? "0" : "") + to_string(seconds);
+
+	return hh + ":" + mm + ":" + ss;
+}
+
+void displayTime(int totalSeconds) {
+
+	cout << "[ " << formatTimeStr(totalSeconds) << " ]" << endl << endl;
 }
 
 void saveToFile(SUBJECTS s[], int p) {
 	ofstream file(FILENAME);
 	if (!file.is_open()) {
-		cout << "Error Could not save data to file!" << endl;
+		cout << "Error: Could not save data to file!" << endl;
 		return;
 	}
 	for (int i = 0; i < p; i++) {
@@ -72,11 +78,14 @@ int loadFromFile(SUBJECTS s[]) {
 
 int menu() {
 	int response;
+	cout << "=======================" << endl;
 	cout << "1. Add subject" << endl;
 	cout << "2. Remove subject" << endl;
 	cout << "3. Start timer" << endl;
 	cout << "4. View your time" << endl;
-	cout << "5. Exit" << endl;
+	cout << "5. View all subjects" << endl;
+	cout << "6. Exit" << endl;
+	cout << "=======================" << endl;
 	cin >> response;
 	if (cin.fail()) {
 		cin.clear();
@@ -87,17 +96,20 @@ int menu() {
 
 int add(SUBJECTS s[], int p) {
 	if (p >= MAX) {
-		cout << "Error: Maximum subject limit reached!" << endl<<endl;
+		cout << "Error: Maximum subject limit (" << MAX << ") reached!" << endl<<endl;
 		return p;
 	}
 	string name;
 	bool alreadyExists;
 
 	while (true) {
-		cout << "Enter the subject name: ";
+		cout << "Enter the subject name (or '0' to cancel): ";
 		getline(cin, name);
 		alreadyExists = false;
 
+		if (name == "0") {
+			return p;
+		}
 		if (name.empty()) {
 			continue;
 		}
@@ -124,10 +136,15 @@ int add(SUBJECTS s[], int p) {
 
 int remove(SUBJECTS s[], int p) {
 
-	string name;
+	if (p == 0) {
+		cout << "No subjects to remove. Please add a subject first." << endl << endl;
+		return p;
+	}
 
+
+	string name;
 	while (true) {
-		cout << "Enter the subject to delete: ";
+		cout << "Enter the subject to delete (or '0' to cancel): ";
 		getline(cin, name);
 
 		if (name == "0") return p;
@@ -160,15 +177,21 @@ int remove(SUBJECTS s[], int p) {
 }
 
 void view(SUBJECTS s[],int p){
+
+	if (p == 0) {
+		cout << "No subjects to view. Please add a subject first." << endl << endl;
+		return;
+	}
+
+
 	string name;
 	int i;
 	while(true) {
 		bool found = false;
-		cout << "Enter the subject you want to see: ";
+		cout << "Enter the subject you want to see (or '0' to cancel): ";
 		getline(cin, name);
-		if (p == 0) {
-			cout << "Add a subject first." << endl << endl;
-			break;
+		if (name == "0") {
+			return;
 		}
 		for (i = 0;i < p;i++) {
 			if (toLowerString(name) == toLowerString(s[i].name)) {
@@ -180,7 +203,8 @@ void view(SUBJECTS s[],int p){
 			cout << "Subject not found. Please try again." << endl;
 		}
 		else {
-			cout << endl <<"Subject: " << s[i].name << endl;
+			cout << endl << "----------------------" << endl;
+			cout <<"Subject: " << s[i].name << endl;
 			cout << "Time: ";
 			displayTime(s[i].time);
 			break;
@@ -189,15 +213,20 @@ void view(SUBJECTS s[],int p){
 }
 			
 void start(SUBJECTS s[],int p) {
+	if (p == 0) {
+		cout << "Add a subject first. Press Enter to continue...";
+		cin.get();
+		return;
+	}
+
 	string name;
 	int i;
 	while (true) {
 		bool found = false;
-		cout << "Enter the subject you want to start tracking: ";
+		cout << "Enter the subject you want to start tracking (or '0' to cancel): ";
 		getline(cin, name);
-		if (p == 0) {
-			cout << "Add a subject first." << endl<<endl;
-			break;
+		if (name == "0") {
+			return;
 		}
 		for (i = 0;i < p;i++) {
 			if (toLowerString(name) == toLowerString(s[i].name)) {
@@ -222,11 +251,36 @@ void start(SUBJECTS s[],int p) {
 
 			cout << "Session time: ";
 			displayTime(seconds_elapsed);
+
 			s[i].time += seconds_elapsed;
 			saveToFile(s, p);
 			break;
 		}
 	}
+}
+
+void viewAll(SUBJECTS s[], int p) {
+	if (p == 0) {
+		cout << "No subjects to view. Please add a subject first." << endl << endl;
+		return;
+	}
+
+	cout << endl << "=========================================" << endl;
+	cout << "             STUDY DASHBOARD             " << endl;
+	cout << "=========================================" << endl;
+	cout << left << setw(25) << "Subject Name" << " | " << "Time Studied" << endl;
+	cout << "-----------------------------------------" << endl;
+
+	int totalOverallSeconds = 0;
+	for (int i = 0; i < p; i++) {
+		cout << left << setw(25) << s[i].name << " | " << formatTimeStr(static_cast<int>(s[i].time)) << endl;
+		totalOverallSeconds += static_cast<int>(s[i].time);
+	}
+
+	cout << "-----------------------------------------" << endl;
+	cout << left << setw(25) << "TOTAL STUDY TIME"
+		<< " | " << formatTimeStr(totalOverallSeconds) << endl;
+	cout << "=========================================" << endl << endl;
 }
 
 int main() {
@@ -256,9 +310,17 @@ int main() {
 			view(subjects, position);
 			break;
 		case 5:
+			viewAll(subjects, position);
+			break;
+		case 6:
 			return 0;
 		default:
-			cout << "Invalid choice. Please try again." << endl;
+			cout << "Invalid choice.Please try again." << endl << endl;
 		}
 	}
 }
+
+
+
+
+
