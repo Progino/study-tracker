@@ -11,6 +11,7 @@
 using namespace std;
 using namespace std::chrono;
 
+
 struct SUBJECTS {
 	string name;
 	double time = 0;
@@ -86,7 +87,8 @@ int menu() {
 	cout << "3. Start timer" << endl;
 	cout << "4. View your time" << endl;
 	cout << "5. View all subjects" << endl;
-	cout << "6. Exit" << endl;
+	cout << "6. View stats" << endl;
+	cout << "7. exit" << endl;
 	cout << "=======================" << endl;
 	cin >> response;
 	if (cin.fail()) {
@@ -304,7 +306,7 @@ void start(SUBJECTS s[],int p) {
 						if (stopEarly) {
 							s[i].time += currentSeconds;
 							saveToFile(s, p);
-							cout << endl << "Session stopped early! Accrued " << formatTimeStr(currentSeconds) << endl;
+							cout << endl << "Session stopped early!" << endl;
 							return;
 						}
 						cout <<endl << "Studying time ended"<<endl;
@@ -344,6 +346,24 @@ void start(SUBJECTS s[],int p) {
 			}
 		}
 	}
+}
+
+void viewStats(SUBJECTS s[], int p) {
+	if (p == 0) {
+		cout << "No subjects to calculate stats for" << endl;
+		return;
+	}
+	int maxIndex = 0;
+	double totalSeconds = 0;
+
+	for (int i = 0;i < p;i++) {
+		totalSeconds += s[i].time;
+		if (s[i].time > s[maxIndex].time) {
+			maxIndex = i;
+		}
+	}
+	cout <<endl << "most studied subject: " << s[maxIndex].name << " (" << formatTimeStr(s[maxIndex].time) << ")" << endl;
+	cout << "average per subject: " << formatTimeStr(static_cast<int>(totalSeconds / p)) << endl << endl;
 }
 
 void viewAll(SUBJECTS s[], int p) {
@@ -403,14 +423,12 @@ int main() {
 			viewAll(subjects, position);
 			break;
 		case 6:
+			viewStats(subjects, position);
+			break;
+		case 7:
 			return 0;
 		default:
 			cout << "Invalid choice.Please try again." << endl << endl;
 		}
 	}
 }
-
-
-
-
-
