@@ -1,5 +1,6 @@
 save the subjects,    x
 delete subjects,      x
+error if put string in stats
 calendar,
 cleaning the code,
 putting event in the calendar,

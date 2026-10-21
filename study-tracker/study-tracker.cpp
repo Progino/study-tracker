@@ -85,17 +85,67 @@ int menu() {
 	cout << "1. Add subject" << endl;
 	cout << "2. Remove subject" << endl;
 	cout << "3. Start timer" << endl;
-	cout << "4. View your time" << endl;
-	cout << "5. View all subjects" << endl;
-	cout << "6. View stats" << endl;
-	cout << "7. exit" << endl;
+	cout << "4. View stats" << endl;
+	cout << "5. View calendar" << endl;
+	cout << "5. Exit" << endl;
 	cout << "=======================" << endl;
 	cin >> response;
 	if (cin.fail()) {
 		cin.clear();
 		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
 	}
 	return response;
+}
+
+void viewCalendar() {
+	cout << endl<<"=========================================" << endl;
+	cout << "               CALENDAR                  " << endl;
+	cout << "=========================================" << endl;
+
+	auto currentTime = system_clock::to_time_t(system_clock::now());
+	tm localTimeStruct;
+	localtime_s(&localTimeStruct, &currentTime);
+	tm* localTime = &localTimeStruct;
+
+	int currentYear = localTime->tm_year + 1900;
+	int currentMonth = localTime->tm_mon;
+
+	string monthNames[] = {"JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER" };
+	int daysInMonth[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+
+	if ((currentYear % 4 == 0 && currentYear % 100 != 0) || (currentYear % 400 == 0)) {
+		daysInMonth[1] = 29;
+	}
+
+	tm firstOfMonth = *localTime;
+	firstOfMonth.tm_mday = 1;
+	mktime(&firstOfMonth);
+
+	int initialSpaces = (firstOfMonth.tm_wday == 0) ? 6 : firstOfMonth.tm_wday - 1;
+	cout << "        " << monthNames[currentMonth] << " " << currentYear << endl << endl;
+	cout << "Mon  Tue  Wed  Thu  Fri  Sat  Sun" << endl;
+	cout << "--------------------------------" << endl;
+
+	for (int i = 0;i < initialSpaces;i++) {
+		cout << "     ";
+	}
+
+	for (int day = 1;day <= daysInMonth[currentMonth]; day++) {
+		if (day == localTime->tm_mday) {
+			cout << setw(3) << "[" << day << "]";
+		}
+		else {
+			cout << setw(4) << day << " ";
+		}
+		if ((day + initialSpaces) % 7 == 0) {
+			cout << endl;
+		}
+	}
+	cout << endl << "---------------------------------" << endl;
+	cout << "Note: current day is highlighted in [ ]" << endl << endl;
+	cout << "Press enter to return to menu";
+	cin.get();
 }
 
 int add(SUBJECTS s[], int p) {
@@ -105,7 +155,6 @@ int add(SUBJECTS s[], int p) {
 	}
 	string name;
 	bool alreadyExists;
-
 	while (true) {
 		cout << "Enter the subject name (or '0' to cancel): ";
 		getline(cin, name);
@@ -179,41 +228,6 @@ int remove(SUBJECTS s[], int p) {
 		
 	}
 }
-
-void view(SUBJECTS s[],int p){
-
-	if (p == 0) {
-		cout << "No subjects to view. Please add a subject first." << endl << endl;
-		return;
-	}
-
-
-	string name;
-	int i;
-	while(true) {
-		bool found = false;
-		cout << "Enter the subject you want to see (or '0' to cancel): ";
-		getline(cin, name);
-		if (name == "0") {
-			return;
-		}
-		for (i = 0;i < p;i++) {
-			if (toLowerString(name) == toLowerString(s[i].name)) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			cout << "Subject not found. Please try again." << endl;
-		}
-		else {
-			cout <<endl <<"Subject: " << s[i].name << endl;
-			cout << "Time: ";
-			displayTime(s[i].time);
-			break;
-		}
-	}
-}
 			
 void start(SUBJECTS s[],int p) {
 	if (p == 0) {
@@ -243,10 +257,17 @@ void start(SUBJECTS s[],int p) {
 		else {
 			while (true) {
 				int mode;
-				cout << "  CHOOSE TRACKING MODE " << endl;
+				cout <<endl<<"  CHOOSE TRACKING MODE " << endl;
 				cout << "1. Standard Stopwatch Timer" << endl;
 				cout << "2. Pomodoro Timer" << endl;
 				cin >> mode;
+
+				if (cin.fail()) {
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					cout << "Invalid input. Please enter a number" << endl << endl;
+					continue;
+				}
 				if (mode == 1) {
 					cin.ignore(numeric_limits<streamsize>::max(), '\n');
 					cout << "press Enter to start the timer" << endl;
@@ -353,41 +374,71 @@ void viewStats(SUBJECTS s[], int p) {
 		cout << "No subjects to calculate stats for" << endl;
 		return;
 	}
-	int maxIndex = 0;
-	double totalSeconds = 0;
+	while (true) {
+		int scelta;
+		cout << endl << "1. view one subject" << endl;
+		cout << "2. view all subjects" << endl;
+		cout << "0. cancel" << endl;
+		cin >> scelta;
 
-	for (int i = 0;i < p;i++) {
-		totalSeconds += s[i].time;
-		if (s[i].time > s[maxIndex].time) {
-			maxIndex = i;
+		if (cin.fail()) {
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			continue;
+		}
+
+		if (scelta == 0) {
+			return;
+		}
+		if (scelta == 1) {
+			cin.ignore(numeric_limits<streamsize>::max(),'\n');
+			string name;
+			while (true) {
+				bool found = false;
+				int i;
+				cout << "Enter the subject you want to see (or '0' to cancel): ";
+				getline(cin, name);
+				if (name == "0") {
+					return;
+				}
+				for (i = 0;i < p;i++) {
+					if (toLowerString(name) == toLowerString(s[i].name)) {
+						found = true;
+						break;
+					}
+				}
+				if (found) {
+					cout << endl << "Subject: " << s[i].name << endl;
+					cout << "Time: ";
+					displayTime(s[i].time);
+					return;
+
+				}
+				cout << "Subject not found. Please try again" << endl;
+			}
+		}
+		else if (scelta == 2) {
+			cout << endl << "=========================================" << endl;
+			cout << "             STUDY DASHBOARD             " << endl;
+			cout << "=========================================" << endl;
+			cout << left << setw(25) << "Subject Name" << " | " << "Time Studied" << endl;
+			cout << "-----------------------------------------" << endl;
+
+			int totalOverallSeconds = 0;
+			for (int i = 0;i < p;i++) {
+				cout << left << setw(25) << s[i].name << " | " << formatTimeStr(static_cast<int>(s[i].time)) << endl;
+				totalOverallSeconds += static_cast<int>(s[i].time);
+			}
+			cout << "-----------------------------------------" << endl;
+			cout << left << setw(25) << "TOTAL STUDY TIME"
+				<< " | " << formatTimeStr(totalOverallSeconds) << endl;
+			cout << "=========================================" << endl << endl;
+			return;
+		}
+		else {
+			cout << "Invalid choice .Please try again." << endl << endl;
 		}
 	}
-	cout <<endl << "most studied subject: " << s[maxIndex].name << " (" << formatTimeStr(s[maxIndex].time) << ")" << endl;
-	cout << "average per subject: " << formatTimeStr(static_cast<int>(totalSeconds / p)) << endl << endl;
-}
-
-void viewAll(SUBJECTS s[], int p) {
-	if (p == 0) {
-		cout << "No subjects to view. Please add a subject first." << endl << endl;
-		return;
-	}
-
-	cout << endl << "=========================================" << endl;
-	cout << "             STUDY DASHBOARD             " << endl;
-	cout << "=========================================" << endl;
-	cout << left << setw(25) << "Subject Name" << " | " << "Time Studied" << endl;
-	cout << "-----------------------------------------" << endl;
-
-	int totalOverallSeconds = 0;
-	for (int i = 0; i < p; i++) {
-		cout << left << setw(25) << s[i].name << " | " << formatTimeStr(static_cast<int>(s[i].time)) << endl;
-		totalOverallSeconds += static_cast<int>(s[i].time);
-	}
-
-	cout << "-----------------------------------------" << endl;
-	cout << left << setw(25) << "TOTAL STUDY TIME"
-		<< " | " << formatTimeStr(totalOverallSeconds) << endl;
-	cout << "=========================================" << endl << endl;
 }
 
 int main() {
@@ -417,18 +468,16 @@ int main() {
 			start(subjects, position); 
 			break;
 		case 4:
-			view(subjects, position);
-			break;
-		case 5:
-			viewAll(subjects, position);
-			break;
-		case 6:
 			viewStats(subjects, position);
 			break;
-		case 7:
+		case 5:
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			viewCalendar();
+			break;
+		case 6:
 			return 0;
 		default:
-			cout << "Invalid choice.Please try again." << endl << endl;
+			cout << "Invalid choice .Please try again." << endl << endl;
 		}
 	}
 }
