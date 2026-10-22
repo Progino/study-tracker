@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include <ctime>
 #include <chrono>
 #include <fstream>
@@ -18,6 +19,10 @@ struct SUBJECTS {
 };
 
 const string FILENAME = "Time.txt";
+
+void clearScreen() {
+	system("cls");
+}
 
 string toLowerString(string str){
 	transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
@@ -93,7 +98,9 @@ int menu() {
 	if (cin.fail()) {
 		cin.clear();
 		cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
+	}
+	else {
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	}
 	return response;
 }
@@ -172,11 +179,15 @@ void viewCalendar() {
 	cout << "Current day is highlighted in [ ]" << endl << endl;
 	cout << "Press enter to return to menu";
 	cin.get();
+	clearScreen();
 }
 
 int add(SUBJECTS s[], int p) {
 	if (p >= MAX) {
 		cout << "Error: Maximum subject limit (" << MAX << ") reached!" << endl<<endl;
+		cout << "Invalid choice" << endl << "Press enter to return";
+		cin.get();
+		clearScreen();
 		return p;
 	}
 	string name;
@@ -187,6 +198,7 @@ int add(SUBJECTS s[], int p) {
 		alreadyExists = false;
 
 		if (name == "0") {
+			clearScreen();
 			return p;
 		}
 		if (name.empty()) {
@@ -205,9 +217,12 @@ int add(SUBJECTS s[], int p) {
 		}
 		else {
 			s[p].name = name;
-			cout << "Subject added successfully." << endl<<endl;
+			cout << "Subject added successfully."<<endl;
 			p++;
 			saveToFile(s, p);
+			cout << "Press enter to return";
+			cin.get();
+			clearScreen();
 			return p;
 		}
 	}
@@ -216,7 +231,9 @@ int add(SUBJECTS s[], int p) {
 int remove(SUBJECTS s[], int p) {
 
 	if (p == 0) {
-		cout << "No subjects to remove. Please add a subject first." << endl << endl;
+		cout << "No subjects to remove. Please add a subject first." << endl << "Press enter to return";
+		cin.get();
+		clearScreen();;
 		return p;
 	}
 
@@ -226,7 +243,10 @@ int remove(SUBJECTS s[], int p) {
 		cout << "Enter the subject to delete (or '0' to cancel): ";
 		getline(cin, name);
 
-		if (name == "0") return p;
+		if (name == "0") {
+			clearScreen();
+			return p;
+		}
 		if (name.empty()) continue;
 
 		int foundIndex = -1;
@@ -246,8 +266,11 @@ int remove(SUBJECTS s[], int p) {
 				s[j] = s[j + 1];
 			}
 			p--;
-			cout << "Subject deleted successfully." << endl << endl;
+			cout << "Subject deleted successfully."<<endl;
 			saveToFile(s, p);
+			cout << "Press enter to return";
+			cin.get();
+			clearScreen();;
 			return p;
 		}
 
@@ -257,8 +280,9 @@ int remove(SUBJECTS s[], int p) {
 			
 void start(SUBJECTS s[],int p) {
 	if (p == 0) {
-		cout << "Add a subject first. Press Enter to continue...";
+		cout << "Add a subject first" << endl << "Press enter to return";
 		cin.get();
+		clearScreen();
 		return;
 	}
 
@@ -269,6 +293,7 @@ void start(SUBJECTS s[],int p) {
 		cout << "Enter the subject you want to start tracking (or '0' to cancel): ";
 		getline(cin, name);
 		if (name == "0") {
+			clearScreen();
 			return;
 		}
 		for (i = 0;i < p;i++) {
@@ -312,6 +337,9 @@ void start(SUBJECTS s[],int p) {
 
 					s[i].time += seconds_elapsed;
 					saveToFile(s, p);
+					cout << endl <<"Press enter to return";
+					cin.get();
+					clearScreen();;
 					return;
 				}
 				else if (mode == 2) {
@@ -353,7 +381,9 @@ void start(SUBJECTS s[],int p) {
 						if (stopEarly) {
 							s[i].time += currentSeconds;
 							saveToFile(s, p);
-							cout << endl << "Session stopped early!" << endl;
+							cout << endl << "Session stopped early!"<< endl << "Press enter to return";
+							cin.get();
+							clearScreen();;
 							return;
 						}
 						cout <<endl << "Studying time ended"<<endl;
@@ -379,12 +409,16 @@ void start(SUBJECTS s[],int p) {
 						}
 
 						if (stopEarly) {
-							cout << endl << "Session stopped early!" << endl;
+							cout << endl << "Session stopped early!"<<endl  << "Press enter to return";
+							cin.get();
+							clearScreen();;
 							return;
 						}
 						cout <<endl<< "Break time ended" << endl;
 					}
-					cout << "Pomodoro timer ended"<<endl;
+					cout << "Pomodoro timer ended" << endl << "Press enter to return";
+					cin.get();
+					clearScreen();
 					return;
 				}
 				else {
@@ -397,7 +431,9 @@ void start(SUBJECTS s[],int p) {
 
 void viewStats(SUBJECTS s[], int p) {
 	if (p == 0) {
-		cout << "No subjects to calculate stats for" << endl;
+		cout << "No subjects to calculate stats for" << endl << "Press enter to return";
+		cin.get();
+		clearScreen();
 		return;
 	}
 	while (true) {
@@ -425,6 +461,7 @@ void viewStats(SUBJECTS s[], int p) {
 				cout << "Enter the subject you want to see (or '0' to cancel): ";
 				getline(cin, name);
 				if (name == "0") {
+					clearScreen();
 					return;
 				}
 				for (i = 0;i < p;i++) {
@@ -435,8 +472,11 @@ void viewStats(SUBJECTS s[], int p) {
 				}
 				if (found) {
 					cout << endl << "Subject: " << s[i].name << endl;
-					cout << "Time: ";
+					cout << "Time: "<< endl;
 					displayTime(s[i].time);
+					cout << "Press enter to return";
+					cin.get();
+					clearScreen();
 					return;
 
 				}
@@ -444,6 +484,7 @@ void viewStats(SUBJECTS s[], int p) {
 			}
 		}
 		else if (scelta == 2) {
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			cout << endl << "=========================================" << endl;
 			cout << "             STUDY DASHBOARD             " << endl;
 			cout << "=========================================" << endl;
@@ -458,7 +499,10 @@ void viewStats(SUBJECTS s[], int p) {
 			cout << "-----------------------------------------" << endl;
 			cout << left << setw(25) << "TOTAL STUDY TIME"
 				<< " | " << formatTimeStr(totalOverallSeconds) << endl;
-			cout << "=========================================" << endl << endl;
+			cout << "=========================================" << endl;
+			cout << "Press enter to return";
+			cin.get();
+			clearScreen();
 			return;
 		}
 		else {
@@ -481,8 +525,6 @@ int main() {
 
 		choice = menu();
 
-		cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
 		switch (choice) {
 		case 1:
 			position = add(subjects, position);
@@ -502,7 +544,9 @@ int main() {
 		case 6:
 			return 0;
 		default:
-			cout << "Invalid choice .Please try again." << endl << endl;
+			cout << "Invalid choice"<<endl<<"Press enter to return";
+			cin.get();
+			clearScreen();
 		}
 	}
 }
