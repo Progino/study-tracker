@@ -87,7 +87,7 @@ int menu() {
 	cout << "3. Start timer" << endl;
 	cout << "4. View stats" << endl;
 	cout << "5. View calendar" << endl;
-	cout << "5. Exit" << endl;
+	cout << "6. Exit" << endl;
 	cout << "=======================" << endl;
 	cin >> response;
 	if (cin.fail()) {
@@ -99,9 +99,9 @@ int menu() {
 }
 
 void viewCalendar() {
-	cout << endl<<"=========================================" << endl;
-	cout << "               CALENDAR                  " << endl;
-	cout << "=========================================" << endl;
+	cout << endl << "==================================" << endl;
+	cout << "             CALENDAR             " << endl;
+	cout << "==================================" << endl;
 
 	auto currentTime = system_clock::to_time_t(system_clock::now());
 	tm localTimeStruct;
@@ -123,27 +123,53 @@ void viewCalendar() {
 	mktime(&firstOfMonth);
 
 	int initialSpaces = (firstOfMonth.tm_wday == 0) ? 6 : firstOfMonth.tm_wday - 1;
-	cout << "        " << monthNames[currentMonth] << " " << currentYear << endl << endl;
-	cout << "Mon  Tue  Wed  Thu  Fri  Sat  Sun" << endl;
-	cout << "--------------------------------" << endl;
+	cout << "          " << monthNames[currentMonth] << " " << currentYear << endl << endl;
+	cout << " Mon  Tue  Wed  Thu  Fri  Sat  Sun" << endl;
+	cout << "----------------------------------" << endl;
 
 	for (int i = 0;i < initialSpaces;i++) {
 		cout << "     ";
 	}
 
 	for (int day = 1;day <= daysInMonth[currentMonth]; day++) {
+		string dayStr = "";
 		if (day == localTime->tm_mday) {
-			cout << setw(3) << "[" << day << "]";
+			if (day < 10) {
+				dayStr = " [ " + to_string(day) + "]";
+			}
+			else {
+				dayStr = " [" + to_string(day) + "]";
+			}
 		}
 		else {
-			cout << setw(4) << day << " ";
+			if (day == localTime->tm_mday + 1) {
+				if (day < 10) {
+					dayStr = "  " + to_string(day);
+				}
+				else {
+					dayStr = " " + to_string(day);
+				}
+			}
+			else {
+				if (day < 10) {
+					dayStr = "   " + to_string(day);
+				}
+				else {
+					dayStr = "  " + to_string(day);
+				}
+			}
 		}
+		cout << dayStr << " ";
 		if ((day + initialSpaces) % 7 == 0) {
 			cout << endl;
 		}
 	}
+
+	if ((daysInMonth[currentMonth] + initialSpaces) % 7 != 0) {
+		cout << endl;
+	}
 	cout << endl << "---------------------------------" << endl;
-	cout << "Note: current day is highlighted in [ ]" << endl << endl;
+	cout << "Current day is highlighted in [ ]" << endl << endl;
 	cout << "Press enter to return to menu";
 	cin.get();
 }
@@ -471,7 +497,6 @@ int main() {
 			viewStats(subjects, position);
 			break;
 		case 5:
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			viewCalendar();
 			break;
 		case 6:
