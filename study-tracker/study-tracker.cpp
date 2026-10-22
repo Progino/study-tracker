@@ -240,7 +240,11 @@ int remove(SUBJECTS s[], int p) {
 
 	string name;
 	while (true) {
-		cout << "Enter the subject to delete (or '0' to cancel): ";
+		cout << "Enter the subject to delete (or '0' to cancel):"<<endl;
+		for (int j = 0;j < p;j++) {
+			cout << s[j].name << " | ";
+		}
+		cout << endl;
 		getline(cin, name);
 
 		if (name == "0") {
@@ -458,7 +462,11 @@ void viewStats(SUBJECTS s[], int p) {
 			while (true) {
 				bool found = false;
 				int i;
-				cout << "Enter the subject you want to see (or '0' to cancel): ";
+				cout << "Enter the subject you want to see (or '0' to cancel):" << endl;
+				for (int j = 0;j < p;j++) {
+					cout << s[j].name << " | ";
+				}
+				cout << endl;
 				getline(cin, name);
 				if (name == "0") {
 					clearScreen();
