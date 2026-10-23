@@ -15,6 +15,7 @@ using namespace std::chrono;
 
 struct SUBJECTS {
 	string name;
+	string color = "";
 	double time = 0;
 };
 
@@ -54,8 +55,19 @@ void saveToFile(SUBJECTS s[], int p) {
 		cout << "Error: Could not save data to file!" << endl;
 		return;
 	}
+	for (int j = 0;j < p - 1;j++) {
+		for (int k = 0;k < p - j - 1;k++) {
+			if (s[k].time < s[k + 1].time) {
+				SUBJECTS q = s[k];
+				s[k] = s[k + 1];
+				s[k + 1] = q;
+			}
+		}
+
+	}
+
 	for (int i = 0; i < p; i++) {
-		file << s[i].name << "," << s[i].time << endl;
+		file << s[i].name << "," << s[i].color << "," << s[i].time <<endl;
 	}
 	file.close();
 }
@@ -68,16 +80,15 @@ int loadFromFile(SUBJECTS s[]) {
 		return 0;
 	}
 
-	string name;
-	double time;
+	string name, color, timeStr;
 
 	while (p < MAX && getline(file, name, ',')) {
-		if (file >> time) {
+		if (getline(file, color, ',') && getline(file, timeStr)) {
 			s[p].name = name;
-			s[p].time = time;
+			s[p].color = color;
+			s[p].time = stod(timeStr);
 			p++;
 		}
-		file >> ws;
 	}
 
 	file.close();
@@ -105,7 +116,58 @@ int menu() {
 	return response;
 }
 
-void viewCalendar() {
+void addColor(SUBJECTS s[],int k) {
+	while (true){
+			int choice;
+			cout << "choose the color for the subject:" << endl;
+			cout << "1. red" << endl;
+			cout << "2. green" << endl;
+			cout << "3. yellow" << endl;
+			cout << "4. blue" << endl;
+			cout << "5. magenta" << endl;
+			cout << "6. cyan" << endl;
+			cout << "0. cancel" << endl;
+			cin >> choice;
+			if (cin.fail()) {
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			}
+			else {
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			}
+			switch (choice) {
+			case 1:
+				s[k].color = "\033[31m";
+				return;
+				break;
+			case 2:
+				s[k].color = "\033[32m";
+				return;
+				break;
+			case 3:
+				s[k].color = "\033[33m";
+				return;
+				break;
+			case 4:
+				s[k].color = "\033[34m";
+				return;
+				break;
+			case 5:
+				s[k].color = "\033[35m";
+				return;
+				break;
+			case 6:
+				s[k].color = "\033[36m";
+				return;
+				break;
+			case 0:
+				return;
+			}
+		cout << "Subject not found. Please try again" << endl;
+	}
+}
+
+void viewCalendar(SUBJECTS s[],int p) {
 	cout << endl << "==================================" << endl;
 	cout << "             CALENDAR             " << endl;
 	cout << "==================================" << endl;
@@ -177,7 +239,23 @@ void viewCalendar() {
 	}
 	cout << endl << "---------------------------------" << endl;
 	cout << "Current day is highlighted in [ ]" << endl << endl;
-	cout << "Press enter to return to menu";
+	/*cout << "1. add test" << endl;
+	cout << "2. delete test"<<endl;
+	cout << "3. return to menu"<<endl;
+	int choice;
+	cin >> choice;
+	switch (choice) {
+	case 1:
+		//addtest;
+		break;
+	case 2:
+		// delete test;
+		break;
+	case 3:
+		clearScreen();
+		return;
+	}*/
+	cout << "press enter to return to menu";
 	cin.get();
 	clearScreen();
 }
@@ -204,12 +282,13 @@ int add(SUBJECTS s[], int p) {
 		if (name.empty()) {
 			continue;
 		}
-
+		int k =0;
 		for (int i = 0; i < p; i++) {
 				if (toLowerString(name) == toLowerString(s[i].name)) {
 					alreadyExists = true;
 					break;
 				}
+				k++;
 		}
 
 		if (alreadyExists) {
@@ -217,6 +296,7 @@ int add(SUBJECTS s[], int p) {
 		}
 		else {
 			s[p].name = name;
+			addColor(s,k);
 			cout << "Subject added successfully."<<endl;
 			p++;
 			saveToFile(s, p);
@@ -294,7 +374,11 @@ void start(SUBJECTS s[],int p) {
 	int i;
 	while (true) {
 		bool found = false;
-		cout << "Enter the subject you want to start tracking (or '0' to cancel): ";
+		cout << "Enter the subject you want to start tracking (or '0' to cancel):"<<endl;
+		for (int j = 0;j < p;j++) {
+			cout << s[j].name << " | ";
+		}
+		cout << endl;
 		getline(cin, name);
 		if (name == "0") {
 			clearScreen();
@@ -441,11 +525,11 @@ void viewStats(SUBJECTS s[], int p) {
 		return;
 	}
 	while (true) {
-		int scelta;
+		int choice;
 		cout << endl << "1. view one subject" << endl;
 		cout << "2. view all subjects" << endl;
 		cout << "0. cancel" << endl;
-		cin >> scelta;
+		cin >> choice;
 
 		if (cin.fail()) {
 			cin.clear();
@@ -453,10 +537,10 @@ void viewStats(SUBJECTS s[], int p) {
 			continue;
 		}
 
-		if (scelta == 0) {
+		if (choice == 0) {
 			return;
 		}
-		if (scelta == 1) {
+		if (choice == 1) {
 			cin.ignore(numeric_limits<streamsize>::max(),'\n');
 			string name;
 			while (true) {
@@ -480,7 +564,7 @@ void viewStats(SUBJECTS s[], int p) {
 				}
 				if (found) {
 					cout << endl << "Subject: " << s[i].name << endl;
-					cout << "Time: "<< endl;
+					cout << "Time: ";
 					displayTime(s[i].time);
 					cout << "Press enter to return";
 					cin.get();
@@ -491,7 +575,7 @@ void viewStats(SUBJECTS s[], int p) {
 				cout << "Subject not found. Please try again" << endl;
 			}
 		}
-		else if (scelta == 2) {
+		else if (choice == 2) {
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			cout << endl << "=========================================" << endl;
 			cout << "             STUDY DASHBOARD             " << endl;
@@ -547,7 +631,7 @@ int main() {
 			viewStats(subjects, position);
 			break;
 		case 5:
-			viewCalendar();
+			viewCalendar(subjects, position);
 			break;
 		case 6:
 			return 0;

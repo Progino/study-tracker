@@ -1,14 +1,14 @@
 save the subjects,    x
 delete subjects,      x
-error if put string in stats
-calendar,
+error if put string in stats x
+calendar, x
 cleaning the code,
 putting event in the calendar,
 planner of studying based on the calendar,(days off)
 statistics{
-	total study time,
+	total study time, x
 	average study time,
-	most studied subject,
+	most studied subject, x
 	least studied subject,
 	study time per day,
 	study time per week,
@@ -17,7 +17,6 @@ statistics{
 goals,
 break time,(what tipe of break(lunch,hobby,...)),
 notes,
-creating interface?(if I can),
 adding level system with points for studying,consistency, and completing goals,
 
 
