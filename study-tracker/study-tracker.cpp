@@ -370,7 +370,7 @@ int deleteTest(SUBJECTS s[], TESTS t[], int p, int n) {
 				int month;
 				while (true) {
 					bool foundM = false;
-					cout << "Insert the month(in number): ";
+					cout << "Insert the month(in number)(or '0' to cancel): ";
 					cin >> month;
 
 					if (cin.fail()) {
@@ -381,6 +381,11 @@ int deleteTest(SUBJECTS s[], TESTS t[], int p, int n) {
 					}
 					else {
 						cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					}
+
+					if (month == 0) {
+						clearScreen();
+						return n;
 					}
 					for (int j = 0;j < n;j++) {
 						if (s[i].color == t[j].color && t[j].month == (month - 1)) {
