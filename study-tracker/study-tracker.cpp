@@ -19,7 +19,14 @@ struct SUBJECTS {
 	double time = 0;
 };
 
-const string FILENAME = "Time.txt";
+struct TESTS {
+	string color = "";
+	int day = 0;
+	int month = 0;
+};
+
+const string FILENAMESUBJECTS = "Time.txt";
+const string FILENAMETESTS = "Tests.txt";
 
 void clearScreen() {
 	system("cls");
@@ -49,31 +56,8 @@ void displayTime(int totalSeconds) {
 	cout << "[ " << formatTimeStr(totalSeconds) << " ]" << endl << endl;
 }
 
-void saveToFile(SUBJECTS s[], int p) {
-	ofstream file(FILENAME);
-	if (!file.is_open()) {
-		cout << "Error: Could not save data to file!" << endl;
-		return;
-	}
-	for (int j = 0;j < p - 1;j++) {
-		for (int k = 0;k < p - j - 1;k++) {
-			if (s[k].time < s[k + 1].time) {
-				SUBJECTS q = s[k];
-				s[k] = s[k + 1];
-				s[k + 1] = q;
-			}
-		}
-
-	}
-
-	for (int i = 0; i < p; i++) {
-		file << s[i].name << "," << s[i].color << "," << s[i].time <<endl;
-	}
-	file.close();
-}
-
-int loadFromFile(SUBJECTS s[]) {
-	ifstream file(FILENAME);
+int loadSubjectsFromFile(SUBJECTS s[]) {
+	ifstream file(FILENAMESUBJECTS);
 	int p = 0;
 
 	if (!file.is_open()) {
@@ -95,6 +79,66 @@ int loadFromFile(SUBJECTS s[]) {
 	return p;
 }
 
+void saveSubjectsToFile(SUBJECTS s[], int p) {
+	ofstream file(FILENAMESUBJECTS);
+	if (!file.is_open()) {
+		cout << "Error: Could not save data to file!" << endl;
+		return;
+	}
+	for (int j = 0;j < p - 1;j++) {
+		for (int k = 0;k < p - j - 1;k++) {
+			if (s[k].time < s[k + 1].time) {
+				SUBJECTS q = s[k];
+				s[k] = s[k + 1];
+				s[k + 1] = q;
+			}
+		}
+
+	}
+
+	for (int i = 0; i < p; i++) {
+		file << s[i].name << "," << s[i].color << "," << s[i].time <<endl;
+	}
+	file.close();
+}
+
+int loadTestsFromFile(TESTS t[]) {
+	ifstream file(FILENAMETESTS);
+	int p = 0;
+
+	if (!file.is_open()) {
+		return 0;
+	}
+
+	string color;
+	int day = 0;
+	int month = 0;
+
+	while (p < MAX && getline(file, color, ',')) {
+			t[p].color = color;
+			t[p].day = day;
+			t[p].month = month;
+			p++;
+	}
+
+	file.close();
+	return p;
+}
+
+void saveTestsToFileTests(TESTS t[], int p) {
+	ofstream file(FILENAMETESTS);
+	if (!file.is_open()) {
+		cout << "Error: Could not save data to file!" << endl;
+		return;
+	}
+
+	for (int i = 0; i < p; i++) {
+		file << t[i].color << "," << t[i].day << "," << t[i].month << endl;
+	}
+	file.close();
+}
+
+
 int menu() {
 	int response;
 	cout << "=======================" << endl;
@@ -102,8 +146,10 @@ int menu() {
 	cout << "2. Remove subject" << endl;
 	cout << "3. Start timer" << endl;
 	cout << "4. View stats" << endl;
-	cout << "5. View calendar" << endl;
-	cout << "6. Exit" << endl;
+	cout << "5. add test" << endl;
+	cout << "6. remove test" << endl;
+	cout << "7. View calendar" << endl;
+	cout << "8. Exit" << endl;
 	cout << "=======================" << endl;
 	cin >> response;
 	if (cin.fail()) {
@@ -116,58 +162,159 @@ int menu() {
 	return response;
 }
 
-void addColor(SUBJECTS s[],int k) {
+void addColor(SUBJECTS s[],int k,int p) {
 	while (true){
-			int choice;
-			cout << "choose the color for the subject:" << endl;
-			cout << "1. red" << endl;
-			cout << "2. green" << endl;
-			cout << "3. yellow" << endl;
-			cout << "4. blue" << endl;
-			cout << "5. magenta" << endl;
-			cout << "6. cyan" << endl;
-			cout << "0. cancel" << endl;
-			cin >> choice;
-			if (cin.fail()) {
-				cin.clear();
-				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		bool alreadyUsed = false;
+		int choice;
+		string color;
+		cout << "choose the color for the subject:" << endl;
+		cout << "1. red" << endl;
+		cout << "2. green" << endl;
+		cout << "3. yellow" << endl;
+		cout << "4. blue" << endl;
+		cout << "5. magenta" << endl;
+		cout << "6. cyan" << endl;
+		cin >> choice;
+		if (cin.fail()) {
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			cout << "Invalid action. Please insert a valid action" << endl;
+			continue;
+		}
+		else {
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		}
+		switch (choice) {
+		case 1:
+			color = "\033[31m";
+			break;
+		case 2:
+			color = "\033[32m";
+			break;
+		case 3:
+			color = "\033[33m";
+			break;
+		case 4:
+			color = "\033[34m";
+			break;
+		case 5:
+			color = "\033[35m";
+			break;
+		case 6:
+			color = "\033[36m";
+			break;
+		default:
+			cout << endl<<"Invalid action.Please insert a valid action" << endl;
+			continue;
+		}
+		for (int i = 0;i < p;i++) {
+			if (color == s[i].color) {
+				alreadyUsed = true;
+				break;
 			}
-			else {
-				cin.ignore(numeric_limits<streamsize>::max(), '\n');
-			}
-			switch (choice) {
-			case 1:
-				s[k].color = "\033[31m";
-				return;
-				break;
-			case 2:
-				s[k].color = "\033[32m";
-				return;
-				break;
-			case 3:
-				s[k].color = "\033[33m";
-				return;
-				break;
-			case 4:
-				s[k].color = "\033[34m";
-				return;
-				break;
-			case 5:
-				s[k].color = "\033[35m";
-				return;
-				break;
-			case 6:
-				s[k].color = "\033[36m";
-				return;
-				break;
-			case 0:
-				return;
-			}
-		cout << "Subject not found. Please try again" << endl;
+		}
+		if (alreadyUsed) {
+			cout << endl<<"Color already in use" << endl;
+			continue;
+		}
+		else {
+			s[k].color = color;
+			return;
+		}
 	}
 }
 
-void viewCalendar(SUBJECTS s[],int p) {
+int addTest(SUBJECTS s[], TESTS t[], int p,int n) {
+	if (p == 0) {
+		cout << "No subjects for the test. Please add a subject first." << endl << "Press enter to return";
+		cin.get();
+		clearScreen();;
+		return n;
+	}
+
+
+	string name;
+	while (true) {
+		bool found = false;
+		cout << "choose the subject(or '0' to cancel):" << endl;
+		for (int i = 0;i < p;i++) {
+			cout << s[i].name << " | ";
+		}
+		cout << endl;
+		getline(cin, name);
+
+		if (name == "0") {
+			clearScreen();
+			return n;
+		}
+		int i;
+		for ( i = 0;i < p;i++) {
+			if (toLowerString(name) == toLowerString(s[i].name)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			cout << "Subject not found. Please try again." << endl;
+			continue;
+		}
+		else {
+			t[n].color = s[i].color;
+			int daysInMonth[] = { 0,31,28,31,30,31,30,31,31,30,31,30,31 };
+			while (true) {
+				cout << "Enter the day of the test: ";
+				int day;
+				cin >> day;
+				if (cin.fail()) {
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					cout << "Error. Enter a number" << endl;
+					continue;
+				}
+				else {
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				}
+				cout << "Enter the the month of the test(in number): ";
+				int month;
+				cin >> month;
+				if (cin.fail()) {
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					cout << "Error. Enter a number" << endl;
+					continue;
+				}
+				else {
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				}
+				if (month > 12) {
+					cout << "Insert a valid month" << endl;
+					continue;
+				}
+				else if (daysInMonth[month] < day) {
+					cout << "Insert a valid day" << endl;
+					continue;
+				}
+				else {
+					t[n].day = day;
+					t[n].month = month;
+					n++;
+					saveTestsToFileTests(t, n);
+					cout << "Test added successfully" << endl;
+					cout << "Press enter to return";
+					cin.get();
+					clearScreen();;
+					return n;
+				}
+			}
+		}
+
+
+	}
+
+
+}
+
+void viewCalendar(SUBJECTS s[], TESTS t[], int p,int n) {
 	cout << endl << "==================================" << endl;
 	cout << "             CALENDAR             " << endl;
 	cout << "==================================" << endl;
@@ -239,22 +386,6 @@ void viewCalendar(SUBJECTS s[],int p) {
 	}
 	cout << endl << "---------------------------------" << endl;
 	cout << "Current day is highlighted in [ ]" << endl << endl;
-	/*cout << "1. add test" << endl;
-	cout << "2. delete test"<<endl;
-	cout << "3. return to menu"<<endl;
-	int choice;
-	cin >> choice;
-	switch (choice) {
-	case 1:
-		//addtest;
-		break;
-	case 2:
-		// delete test;
-		break;
-	case 3:
-		clearScreen();
-		return;
-	}*/
 	cout << "press enter to return to menu";
 	cin.get();
 	clearScreen();
@@ -296,10 +427,10 @@ int add(SUBJECTS s[], int p) {
 		}
 		else {
 			s[p].name = name;
-			addColor(s,k);
+			addColor(s,k,p);
 			cout << "Subject added successfully."<<endl;
 			p++;
-			saveToFile(s, p);
+			saveSubjectsToFile(s, p);
 			cout << "Press enter to return";
 			cin.get();
 			clearScreen();
@@ -351,7 +482,7 @@ int remove(SUBJECTS s[], int p) {
 			}
 			p--;
 			cout << "Subject deleted successfully."<<endl;
-			saveToFile(s, p);
+			saveSubjectsToFile(s, p);
 			cout << "Press enter to return";
 			cin.get();
 			clearScreen();;
@@ -424,7 +555,7 @@ void start(SUBJECTS s[],int p) {
 					displayTime(seconds_elapsed);
 
 					s[i].time += seconds_elapsed;
-					saveToFile(s, p);
+					saveSubjectsToFile(s, p);
 					cout << endl <<"Press enter to return";
 					cin.get();
 					clearScreen();;
@@ -468,7 +599,7 @@ void start(SUBJECTS s[],int p) {
 
 						if (stopEarly) {
 							s[i].time += currentSeconds;
-							saveToFile(s, p);
+							saveSubjectsToFile(s, p);
 							cout << endl << "Session stopped early!"<< endl << "Press enter to return";
 							cin.get();
 							clearScreen();;
@@ -477,7 +608,7 @@ void start(SUBJECTS s[],int p) {
 						cout <<endl << "Studying time ended"<<endl;
 
 						s[i].time += activeTimeSeconds;
-						saveToFile(s, p);
+						saveSubjectsToFile(s, p);
 
 						if (r == rounds)break;
 
@@ -605,10 +736,13 @@ void viewStats(SUBJECTS s[], int p) {
 
 int main() {
 	SUBJECTS subjects[MAX];
+	TESTS tests[100];
 	int choice;
 	int position = 0;
+	int numberOfTests = 0;
 
-	position = loadFromFile(subjects);
+	position = loadSubjectsFromFile(subjects);
+	numberOfTests = loadTestsFromFile(tests);
 
 	cout << "=======================" << endl;
 	cout << "     STUDY TRACKER     " << endl;
@@ -631,9 +765,15 @@ int main() {
 			viewStats(subjects, position);
 			break;
 		case 5:
-			viewCalendar(subjects, position);
+			numberOfTests = addTest(subjects, tests, position, numberOfTests);
 			break;
 		case 6:
+			//deleteTest(subjects, tests,position, numberOfTests);
+			break;
+		case 7:
+			viewCalendar(subjects, tests,position,numberOfTests);
+			break;
+		case 8:
 			return 0;
 		default:
 			cout << "Invalid choice"<<endl<<"Press enter to return";
