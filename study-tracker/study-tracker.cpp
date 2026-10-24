@@ -28,6 +28,12 @@ struct TESTS {
 const string FILENAMESUBJECTS = "Time.txt";
 const string FILENAMETESTS = "Tests.txt";
 
+string cleanString(string s) {
+	while (!s.empty() && isspace((unsigned char)s.front())) s.erase(s.begin());
+	while (!s.empty() && isspace((unsigned char)s.back())) s.pop_back();
+	return s;
+}
+
 void clearScreen() {
 	system("cls");
 }
@@ -111,16 +117,21 @@ int loadTestsFromFile(TESTS t[]) {
 	}
 
 	string color;
-	int day = 0;
-	int month = 0;
+	string dayStr;
+	string monthStr;
 
-	while (p < MAX && getline(file, color, ',')) {
+	while (p < MAX &&
+		getline(file, color, ',') &&
+		getline(file, dayStr, ',') &&
+		getline(file, monthStr)) {
+
+	
 			t[p].color = color;
-			t[p].day = day;
-			t[p].month = month;
+			t[p].day = stoi(dayStr);
+			t[p].month = stoi(monthStr);
 			p++;
+		
 	}
-
 	file.close();
 	return p;
 }
@@ -295,6 +306,7 @@ int addTest(SUBJECTS s[], TESTS t[], int p,int n) {
 					continue;
 				}
 				else {
+					month--;
 					t[n].day = day;
 					t[n].month = month;
 					n++;
@@ -314,7 +326,7 @@ int addTest(SUBJECTS s[], TESTS t[], int p,int n) {
 
 }
 
-void viewCalendar(SUBJECTS s[], TESTS t[], int p,int n) {
+void viewCalendar(SUBJECTS s[], TESTS t[],int n) {
 	cout << endl << "==================================" << endl;
 	cout << "             CALENDAR             " << endl;
 	cout << "==================================" << endl;
@@ -349,29 +361,45 @@ void viewCalendar(SUBJECTS s[], TESTS t[], int p,int n) {
 
 	for (int day = 1;day <= daysInMonth[currentMonth]; day++) {
 		string dayStr = "";
+		string color = "\033[0m";
+
+		for (int i = 0;i < n;i++) {
+			string rawColor = t[i].color;
+			while (!rawColor.empty() && isspace(rawColor.back())) {
+				rawColor.pop_back();
+			}
+
+			if (t[i].month == currentMonth) {
+				if (t[i].day == day) {
+					color = "\033" + rawColor;
+					break;
+				}
+			}
+		}
+
 		if (day == localTime->tm_mday) {
 			if (day < 10) {
-				dayStr = " [ " + to_string(day) + "]";
+				dayStr = " [ " + color + to_string(day) + "\033[0m" + "]";
 			}
 			else {
-				dayStr = " [" + to_string(day) + "]";
+				dayStr = " [" + color + to_string(day) + "\033[0m" + "]";
 			}
 		}
 		else {
 			if (day == localTime->tm_mday + 1) {
 				if (day < 10) {
-					dayStr = "  " + to_string(day);
+					dayStr = "  " + color + to_string(day) + "\033[0m";
 				}
 				else {
-					dayStr = " " + to_string(day);
+					dayStr = " " + color + to_string(day) + "\033[0m";
 				}
 			}
 			else {
 				if (day < 10) {
-					dayStr = "   " + to_string(day);
+					dayStr = "   " + color + to_string(day) + "\033[0m";
 				}
 				else {
-					dayStr = "  " + to_string(day);
+					dayStr = "  " + color + to_string(day) + "\033[0m";
 				}
 			}
 		}
@@ -771,7 +799,7 @@ int main() {
 			//deleteTest(subjects, tests,position, numberOfTests);
 			break;
 		case 7:
-			viewCalendar(subjects, tests,position,numberOfTests);
+			viewCalendar(subjects, tests,numberOfTests);
 			break;
 		case 8:
 			return 0;
