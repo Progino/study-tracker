@@ -328,8 +328,119 @@ int deleteTest(SUBJECTS s[], TESTS t[], int p, int n) {
 		return n;
 	}
 
+	string name;
 	while (true) {
-		cout << "insert the subject of the test you want to remove";
+		bool found = false;
+		cout << "insert the subject of the test you want to remove(or '0' to cancel)"<<endl;
+		for (int j = 0;j < p;j++) {
+			cout << s[j].name << " | ";
+		}
+		cout << endl;
+		getline(cin, name);
+		if (name == "0") {
+			clearScreen();
+			return n;
+		}
+
+		int  i;
+		for (i = 0;i < p;i++) {
+
+			if (toLowerString(name) == toLowerString(s[i].name)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			cout << "Subject not found. Please try again" << endl;
+			continue;
+		}
+		else {
+			bool foundT = false;
+			for (int j = 0;j < n;j++) {
+				if (s[i].color == t[j].color) {
+					foundT = true;
+					break;
+				}
+			}
+			if(!foundT){
+				cout << "This subject doesn't have tests. Pleas try again" << endl << endl;
+				continue;
+			}
+			else {
+				int month;
+				while (true) {
+					bool foundM = false;
+					cout << "Insert the month(in number): ";
+					cin >> month;
+
+					if (cin.fail()) {
+						cin.clear();
+						cin.ignore(numeric_limits<streamsize>::max(), '\n');
+						cout << "Error. Enter a number" << endl << endl;
+						continue;
+					}
+					else {
+						cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					}
+					for (int j = 0;j < n;j++) {
+						if (s[i].color == t[j].color && t[j].month == (month - 1)) {
+							foundM = true;
+							break;
+						}
+					}
+					if (!foundM) {
+						cout << "This month doesn't have tests. Pleas try again" << endl << endl;
+						continue;
+					}
+					else {
+						int day;
+						while (true) {
+							bool foundD = false;
+							cout << "insert the day(or '0' to cancel): " << endl;
+							cin >> day;
+
+							if (cin.fail()) {
+								cin.clear();
+								cin.ignore(numeric_limits<streamsize>::max(), '\n');
+								cout << "Error. Enter a number" << endl << endl;
+								continue;
+							}
+							else {
+								cin.ignore(numeric_limits<streamsize>::max(), '\n');
+							}
+							if (day == 0) {
+								clearScreen();
+								return n;
+							}
+
+							int k;
+							for ( k = 0;k < n;k++) {
+								if (s[i].color == t[k].color && t[k].month == (month - 1) && t[k].day == day) {
+									foundD = true;
+									break;
+								}
+							}
+							if (!foundD) {
+								cout << "this day doesn't have a test. Pleas try again" << endl << endl;
+								continue;
+							}
+							else {
+								for (int j = k;j < n - 1;j++) {
+									t[j] = t[j + 1];
+								}
+								n--;
+								cout << "Test deleted" << endl;
+								saveTestsToFileTests(t, n);
+								cout << "Press enter to return to menu";
+								cin.get();
+								clearScreen();
+								return n;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -543,7 +654,7 @@ int remove(SUBJECTS s[], int p,TESTS t[],int &n) {
 			p--;
 			cout << "Subject deleted successfully."<<endl;
 			saveSubjectsToFile(s, p);
-			cout << "Press enter to return";
+			cout << "Press enter to return to menu";
 			cin.get();
 			clearScreen();;
 			return p;
@@ -828,7 +939,7 @@ int main() {
 			numberOfTests = addTest(subjects, tests, position, numberOfTests);
 			break;
 		case 6:
-			//numberOfTests = deleteTest(subjects, tests,position, numberOfTests);
+			numberOfTests = deleteTest(subjects, tests,position, numberOfTests);
 			break;
 		case 7:
 			viewCalendar(subjects, tests,position,numberOfTests);
