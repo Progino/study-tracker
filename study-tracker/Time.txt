@@ -1,4 +1,2 @@
-math,[31m,0
-history,[32m,0
-science,[33m,0
-english,[35m,0
+Chemistry,[32m,25
+History,[36m,4.07945

@@ -28,12 +28,6 @@ struct TESTS {
 const string FILENAMESUBJECTS = "Time.txt";
 const string FILENAMETESTS = "Tests.txt";
 
-string cleanString(string s) {
-	while (!s.empty() && isspace((unsigned char)s.front())) s.erase(s.begin());
-	while (!s.empty() && isspace((unsigned char)s.back())) s.pop_back();
-	return s;
-}
-
 void clearScreen() {
 	system("cls");
 }
@@ -326,7 +320,34 @@ int addTest(SUBJECTS s[], TESTS t[], int p,int n) {
 
 }
 
-void viewCalendar(SUBJECTS s[], TESTS t[],int n) {
+int deleteTest(SUBJECTS s[], TESTS t[], int p, int n) {
+	if (p == 0 || n == 0) {
+		cout << "No tests to remove. Please add a test first." << endl << "Press enter to return";
+		cin.get();
+		clearScreen();;
+		return n;
+	}
+
+	while (true) {
+		cout << "insert the subject of the test you want to remove";
+	}
+}
+
+int deleteSubjectTests(SUBJECTS s[], TESTS t[], int k, int n) {
+	for (int i = 0;i < n;i++) {
+		if (t[i].color == s[k].color) {
+			for (int j = i;j < n - 1;j++) {
+				t[j] = t[j + 1];
+			}
+			n--;
+			i--;
+		}
+	}
+	saveTestsToFileTests(t, n);
+	return n;
+}
+
+void viewCalendar(SUBJECTS s[], TESTS t[],int p,int n) {
 	cout << endl << "==================================" << endl;
 	cout << "             CALENDAR             " << endl;
 	cout << "==================================" << endl;
@@ -413,8 +434,17 @@ void viewCalendar(SUBJECTS s[], TESTS t[],int n) {
 		cout << endl;
 	}
 	cout << endl << "---------------------------------" << endl;
-	cout << "Current day is highlighted in [ ]" << endl << endl;
-	cout << "press enter to return to menu";
+	cout << "Current day is highlighted in [ ]" << endl;
+	cout << "Subject: ";
+	for (int i = 0;i < p;i++) {
+		if (i == 0) {
+			cout<< "\033" << s[i].color << s[i].name << "\033[0m" << endl;
+		}
+		else {
+			cout << "\t " << "\033" << s[i].color << s[i].name << "\033[0m" << endl;
+		}
+	}
+	cout <<endl<< "press enter to return to menu";
 	cin.get();
 	clearScreen();
 }
@@ -467,7 +497,7 @@ int add(SUBJECTS s[], int p) {
 	}
 }
 
-int remove(SUBJECTS s[], int p) {
+int remove(SUBJECTS s[], int p,TESTS t[],int &n) {
 
 	if (p == 0) {
 		cout << "No subjects to remove. Please add a subject first." << endl << "Press enter to return";
@@ -505,6 +535,8 @@ int remove(SUBJECTS s[], int p) {
 			cout << "Subject not found. Please try again." << endl;
 		}
 		else {
+			n = deleteSubjectTests(s, t, foundIndex, n);
+
 			for (int j = foundIndex; j < p - 1; j++) {
 				s[j] = s[j + 1];
 			}
@@ -784,7 +816,7 @@ int main() {
 			position = add(subjects, position);
 			break;
 		case 2:
-			position = remove(subjects, position);
+			position = remove(subjects, position,tests,numberOfTests);
 			break;
 		case 3:
 			start(subjects, position); 
@@ -796,10 +828,10 @@ int main() {
 			numberOfTests = addTest(subjects, tests, position, numberOfTests);
 			break;
 		case 6:
-			//deleteTest(subjects, tests,position, numberOfTests);
+			//numberOfTests = deleteTest(subjects, tests,position, numberOfTests);
 			break;
 		case 7:
-			viewCalendar(subjects, tests,numberOfTests);
+			viewCalendar(subjects, tests,position,numberOfTests);
 			break;
 		case 8:
 			return 0;
