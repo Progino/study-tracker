@@ -8,5 +8,7 @@ To navigate between the option you will have to use the numbers placed before th
 
 How to run: download the study-tracker_v1.1.0.zip, extract it and launch the study-tracker application.
 
+used ai to help with the Logic for cinfail(), and for making the program looks good with the separators and the Lines of equals.\
+
 Coding language: c++\
 Made using: Visual Studio 2026
